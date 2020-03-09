@@ -27,7 +27,7 @@ const upload = multer({
 
 router.get('/itgov', (req, res, next) => {
 
-     sql.connect(erro => {
+    sql.connect(erro => {
 
         if (erro) { return res.status(501).send({ messagem: erro.message }) }
 
@@ -54,9 +54,9 @@ router.get('/itgov', (req, res, next) => {
     })
 })
 
-router.get('/orcamento',  (req, res, next) => {
+router.get('/orcamento', (req, res, next) => {
 
-     sql.connect(erro => {
+    sql.connect(erro => {
 
         if (erro) { return res.status(501).send({ messagem: erro.message }) }
 
@@ -94,9 +94,9 @@ router.get('/orcamento',  (req, res, next) => {
 
 })
 
-router.get('/itcapacity',  (req, res, next) => {
+router.get('/itcapacity', (req, res, next) => {
 
-     sql.connect(erro => {
+    sql.connect(erro => {
 
         if (erro) { return res.status(501).send({ messagem: erro.message }) }
 
@@ -133,11 +133,11 @@ router.get('/itcapacity',  (req, res, next) => {
 
 })
 
-router.post('/config',  (req, res, next) => {
+router.post('/config', (req, res, next) => {
 
     console.log(req.body)
 
-     sql.connect(erro => {
+    sql.connect(erro => {
         if (erro) { return res.status(501).send({ error: erro.message }) }
 
         sql.query(`SELECT * FROM TBL_CT_CONFIG_PREMISSAS WHERE ID_MES = '${req.body.id_mes}'`)
@@ -190,7 +190,7 @@ router.post('/config',  (req, res, next) => {
                         })
 
                     }).catch(erro => {
-                        
+
                         console.log(erro)
                         res.status(501).send({
                             erro: erro.message
@@ -200,7 +200,7 @@ router.post('/config',  (req, res, next) => {
 
 
             }).catch(erro => {
-                
+
                 console.log(erro)
                 res.status(501).send({
                     error: erro.message
@@ -212,34 +212,271 @@ router.post('/config',  (req, res, next) => {
 
 router.get('/config/:ano', (req, res, next) => {
 
-    
+
     const ano = req.params.ano;
-    console.log(ano)
+
 
     sql.connect(erro => {
 
-       if (erro) { return res.status(501).send({ messagem: erro.message }) }
+        if (erro) { return res.status(501).send({ messagem: erro.message }) }
 
-       sql.query(`SELECT * FROM TBL_CT_CONFIG_PREMISSAS WHERE ID_MES LIKE '%${ano}%' `)
-           .then(dados => {
+        sql.query(`SELECT * FROM TBL_CT_CONFIG_PREMISSAS WHERE ID_MES LIKE '%${ano}%' `)
+            .then(dados => {
 
-               const result = dados.recordset
+                const result = dados.recordset
 
-               res.status(200).send({
-                   results: result
-               })
+                res.status(200).send({
+                    results: result
+                })
 
-           }).catch(e => {
+            }).catch(e => {
 
 
-               res.status(501).send({
-                   erro: e.message
-               })
+                res.status(501).send({
+                    erro: e.message
+                })
 
-           })
-   })
+            })
+    })
 })
 
+router.get('/vermaisorcamento', (req, res, next) => {
+
+    sql.connect(erro => {
+
+        sql.query(
+            `SELECT 
+        MES, 
+        LOWER(GERENTE) AS GERENTE,
+        CASE WHEN [REAL] IS NULL THEN 0 ELSE  [REAL] END AS [REAL]
+        FROM VW_CT_RESUMO_OPEX ORDER BY MES DESC`
+        ).then(real => {
+
+
+            sql.query(`SELECT 
+        MES,
+        LOWER(GERENTE) AS GERENTE,
+        ID_BUDGET,
+        BUDGET
+        FROM VW_CT_RESUMO_BUDGET`)
+                .then(budget => {
+
+
+                    sql.query(`SELECT 
+        ID_BUDGET
+        from VW_CT_RESUMO_BUDGET
+        GROUP BY ID_BUDGET`)
+                        .then(select => {
+
+                            res.status(200).send({
+
+                                real: real.recordset,
+                                budget: budget.recordset,
+                                select: select.recordset
+
+                            })
+
+
+                        }).catch(erro => {
+
+                            res.status(501).send({
+                                error: erro.message
+                            })
+
+                        })
+
+
+                }).catch(erro => {
+
+                    res.status(501).send({
+                        error: erro.message
+                    })
+
+                })
+
+
+        }).catch(erro => {
+
+            res.status(501).send({
+                error: erro.message
+            })
+
+        })
+
+
+    })
+
+
+
+})
+
+router.get('/fornecedores', (req, res, next) => {
+
+    sql.connect(erro => {
+
+        sql.query(
+            `
+          SELECT
+         
+        LOWER(GERENTE) GERENTE,
+        FORNECEDOR,
+        [REAL]
+        FROM [dbo].[VW_CT_MAIORES_FORNECEDORES]
+        ORDER BY GERENTE ASC, [REAL] DESC
+          
+          `
+        ).then(real => {
+
+            res.status(200).send({
+                real: real.recordset
+            })
+
+        }).catch(erro => {
+
+            res.status(501).send({
+                error: erro.message
+            })
+
+        })
+
+
+    })
+
+
+
+})
+
+router.get('/ilon', (req, res, next) => {
+
+    sql.connect(erro => {
+
+        sql.query(
+            `
+            SELECT  
+            LOWER(GERENTE) GERENTE,
+            CATEGORIA_ILON AS ILON,
+            [REAL]
+            FROM [dbo].[VW_CT_OPEX]
+            WHERE [REAL] IS NOT NULL
+            ORDER BY GERENTE ASC, [REAL] DESC 
+          
+          `
+        ).then(real => {
+
+            res.status(200).send({
+                ilon: real.recordset
+            })
+
+        }).catch(erro => {
+
+            res.status(501).send({
+                error: erro.message
+            })
+
+        })
+
+
+    })
+
+
+
+})
+
+router.get('/depre', (req, res, next) => {
+
+    sql.connect(erro => {
+
+        sql.query(
+            `
+            SELECT       
+            LOWER(GERENTE) AS GERENTE,
+            OPEX,
+            DEPRECIACAO AS DEPRE
+            FROM [dbo].[VW_CT_OPEX_X_DEPRECIACAO]
+          
+          `
+        ).then(real => {
+
+            res.status(200).send({
+                depre_opex: real.recordset
+            })
+
+        }).catch(erro => {
+
+            res.status(501).send({
+                error: erro.message
+            })
+
+        })
+
+
+    })
+
+
+
+})
+
+router.get('/previsaolanding', (req, res, next) => {
+
+
+
+    sql.connect(erro => {
+
+        if(erro){ return res.status(501).send({ erro: erro.message }) }
+
+        sql.query(
+            `
+            SELECT       
+            LOWER(GERENTE) AS GERENTE,
+            MES,
+            DEB
+            FROM [dbo].[VW_CT_CRED_DEB_DRILL_DOWN]
+            ORDER BY GERENTE ASC, MES ASC
+          `
+        ).then(dataReal => {
+
+            real = dataReal.recordset
+
+            sql.query(` 
+            SELECT
+            LOWER(GERENTE) AS GERENTE,
+            AVG(DEB) AS MEDIA
+            FROM [dbo].[VW_CT_CRED_DEB_DRILL_DOWN]
+            GROUP BY GERENTE
+            ORDER BY GERENTE ASC
+            
+            `).then(dataMedia => {
+
+                media = dataMedia.recordset
+
+                res.status(200).send({
+
+                    resultado_real: dataReal.recordset,
+                    resultado_media: dataMedia.recordset
+
+                })
+
+            }).catch(erro => {
+
+                res.status(501).send({
+                    error: erro.message
+                })
+            })
+
+        }).catch(erro => {
+
+            res.status(501).send({
+                error: erro.message
+            })
+
+        })
+
+
+    })
+
+
+
+})
 
 router.post('/upload', upload.single('document'), (req, res, next) => {
 
