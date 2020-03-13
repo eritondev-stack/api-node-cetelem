@@ -12,7 +12,6 @@ global.io = io
 //Importar os metodos separados
 require('./socket.io')
 
-
 console.log('Executando na porta ' + port)
 server.listen(port);
 

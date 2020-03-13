@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
 
     destination: function (req, file, cb) {
 
-        cb(null, './imagens/')
+        cb(null, './uploads/')
 
     },
     filename: function (req, file, cb) {
@@ -480,11 +480,11 @@ router.get('/previsaolanding', (req, res, next) => {
 
 router.post('/upload', upload.single('document'), (req, res, next) => {
 
-    io.emit('get', { photo: `${process.env.URL_PADRAO}imagens/${req.file.filename}` })
+    io.emit('get', { photo: `${process.env.URL_PADRAO}uploads/${req.file.filename}` })
     res.status(200).send({
 
         //nome: req.body.nome,
-        messagem: `${process.env.URL_PADRAO}imagens/${req.file.filename}`
+        messagem: `${process.env.URL_PADRAO}uploads/${req.file.filename}`
 
     })
 })

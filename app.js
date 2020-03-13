@@ -9,8 +9,8 @@ const rotaUsuario = require('./routes/usuario')
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
-app.use('/imagens', express.static("imagens"))
 
+app.use('/imagens', express.static("uploads"))
 
 //Habiliar o Cors
 app.use((req, res, next)=>{
