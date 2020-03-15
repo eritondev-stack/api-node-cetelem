@@ -1,19 +1,18 @@
-module.exports = io.on('connection', (socket) => {
+// eslint-disable-next-line no-undef
+module.exports = io.on("connection", socket => {
+  console.log("Alguem conectou");
 
-  console.log('Alguem conectou')
+  socket.on("disconnect", () => {
+    console.log("Alguem saiu");
+  });
 
-  socket.on('disconnect', () => {
+  socket.on("enviar", dados => {
+    enviei(dados);
+  });
 
-    console.log('Alguem saiu')
+  // eslint-disable-next-line no-undef
+  io.emit("get", { msg: "Cheguei no primeiro modulo" });
 
-  })
-
-  socket.on('enviar', (dados) => {
-
-    enviei(dados)
-
-  })
-
-  const enviei = dados => io.emit('receber', dados)
-
-})
+  // eslint-disable-next-line no-undef
+  const enviei = dados => io.emit("receber", dados);
+});
