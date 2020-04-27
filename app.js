@@ -9,7 +9,7 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use("/imagens", express.static("uploads"));
+app.use("/uploads", express.static("uploads"));
 
 // Habiliar o Cors
 app.use((req, res, next) => {

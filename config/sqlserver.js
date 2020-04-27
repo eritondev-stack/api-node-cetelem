@@ -2,11 +2,11 @@ require("dotenv").config();
 const sql = require("mssql");
 
 const pool = new sql.ConnectionPool({
-  user: "user_dev",
-  password: "E21071993",
-  port: 5003,
-  server: "mssql914.umbler.com",
-  database: "banco_projetos",
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  port: process.env.PORT_DATABASE,
+  server: process.env.HOST,
+  database: process.env.DATABASE,
   options: {
     encrypt: false,
     enableArithAbort: true
